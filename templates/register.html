@@ -4,6 +4,17 @@
     <title>Reigster</title>
 </head>
 <body>
-    <p>This will evolve into the register page<p>
+    <!-- TODO make use of bootstrap or similar for styling -->
+    <h2>Register</h2>
+    <form action="/register" method="post">
+        <div>
+            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+        </div>
+        <div>
+            <input name="password" placeholder="Password" type="password">
+        </div>
+        <!-- TODO: Implement password confirmation -->
+        <button type="submit">Register</button>
+    </form>
 </body>
 </html>
