@@ -4,6 +4,7 @@ from passlib.hash import sha256_crypt
 
 
 app = Flask(__name__)
+app.secret_key = "used for dev"
 
 
 def create_user_db():
@@ -43,12 +44,15 @@ def login():
 
         conn = sqlite3.connect("users.db")
         cursor = conn.cursor()
+
+        # Fetch the hashed password
         cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
         hashed_password = cursor.fetchone()
+
         conn.close()
 
-        # Check if the password provided matches the hashed_password
-        if sha256_crypt.verify(hashed_password, password):
+        # Check if the password provided matches the hash and redirect to the index
+        if sha256_crypt.verify(password, hashed_password[0]):
             session["username"] = username
             return redirect("/")
     return render_template("login.html")
