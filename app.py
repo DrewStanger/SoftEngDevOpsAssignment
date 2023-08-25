@@ -1,5 +1,6 @@
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request, session
 import sqlite3
+from passlib.hash import sha256_crypt
 
 
 app = Flask(__name__)
@@ -34,10 +35,23 @@ def index():
 
 
 # Login route
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "GET":
-        return render_template("login.html")
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+        hashed_password = cursor.fetchone()
+        conn.close()
+
+        # Check if the password provided matches the hashed_password
+        if sha256_crypt.verify(hashed_password, password):
+            session["username"] = username
+            return redirect("/")
+    return render_template("login.html")
 
 
 # Register route
@@ -47,14 +61,15 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # TODO:Hash password for security reasons
+        # Hash password for security reasons
+        hashed_password = sha256_crypt.encrypt(password)
 
         # Add user to users.db
         conn = sqlite3.connect("users.db")
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO users (username, password) VALUES (?, ?)",
-            (username, password),
+            (username, hashed_password),
         )
         conn.commit()
         conn.close()
