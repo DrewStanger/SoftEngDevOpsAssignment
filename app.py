@@ -8,7 +8,7 @@ app.secret_key = "used for dev"
 
 
 def create_user_db():
-    conn = sqlite3.connect("/users.db")
+    conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -55,6 +55,7 @@ def login():
         if sha256_crypt.verify(password, hashed_password[0]):
             session["username"] = username
             return redirect("/")
+        # TODO: add error messaging, incorrect password? user does not exist?
     return render_template("login.html")
 
 
