@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Reigster</title>
-</head>
-<body>
+{% extends "layout.html" %}
+
+{% block head %}
+    <title>Register</title>
+{% endblock %}
+
+{% block body %}
     <!-- TODO make use of bootstrap or similar for styling -->
     <h2>Register</h2>
     <form action="/register" method="post">
@@ -16,5 +17,4 @@
         <!-- TODO: Implement password confirmation -->
         <button type="submit">Register</button>
     </form>
-</body>
-</html>
+{% endblock %}
