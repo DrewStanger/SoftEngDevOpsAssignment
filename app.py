@@ -1,11 +1,14 @@
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session
+from flask_session import Session
 import sqlite3
 from passlib.hash import sha256_crypt
 
-
+# configure app
 app = Flask(__name__)
 app.secret_key = "used for dev"
-
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 def create_user_db():
     conn = sqlite3.connect("users.db")
@@ -28,11 +31,12 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-# load the index
 @app.route("/")
 def index():
-    if request.method == "GET":
-        return render_template("index.html")
+    # Users must login to use the system, check if user is logged in
+    if not session.get("name"):
+        return redirect("/login")
+    return render_template("index.html")
 
 
 # Login route
@@ -45,7 +49,7 @@ def login():
         conn = sqlite3.connect("users.db")
         cursor = conn.cursor()
 
-        # Fetch the hashed password
+        # Fetch the hashed password, using ? prevents SQL injections
         cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
         hashed_password = cursor.fetchone()
 
@@ -53,10 +57,21 @@ def login():
 
         # Check if the password provided matches the hash and redirect to the index
         if sha256_crypt.verify(password, hashed_password[0]):
-            session["username"] = username
-            return redirect("/")
+            # Store username in session
+            session["name"] = username
+            return redirect("/dashboard")
         # TODO: add error messaging, incorrect password? user does not exist?
+    # If request.method !== POST, load login page 
     return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session["name"] = None
+    return redirect("/")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 
 # Register route

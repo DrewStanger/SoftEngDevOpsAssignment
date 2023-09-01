@@ -1,0 +1,9 @@
+{% extends "dashboardlayout.html" %}
+
+{% block head %}
+    <title>Welcome</title>
+{% endblock %}
+
+{% block body %}
+    <h1>You are logged in as: {{session.get("name")}}</h1>
+{% endblock %}
