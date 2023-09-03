@@ -18,7 +18,20 @@ def create_user_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            isAdmin BOOLEAN NOT NULL
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_status (
+            urconst INTEGER PRIMARY KEY,
+            status TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            setting_user_id INTEGER NOT NULL
+            setting_username TEXT NOT NULL 
+            FOREIGN KEY (setting_user_id) REFERENCES users(id)
         )
         """
     )
@@ -71,7 +84,25 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    # TODO DISPLAY THE LIST OF USERS IN THE USER_STATUS TABLE
+    conn = sqlite3.connect("user_status.db")
+    cursor = conn.cursor()
+
+    # Fetch the hashed password, using ? prevents SQL injections
+    data = cursor.execute("SELECT * FROM user_status")
+    conn.close()
+
+    # table data
+    table_data = []
+    for entry in data:
+        # urconst= entry.urconst
+        # status= entry.status
+        # reason= entry.reason
+        # set_by= entry.set_by
+        # user_id= entry.user_id
+        table_data.append(entry) 
+
+    return render_template("dashboard.html", table_data=table_data)
 
 
 # Register route
