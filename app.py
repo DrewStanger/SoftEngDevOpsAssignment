@@ -92,7 +92,7 @@ def dashboard():
     data = cursor.execute("SELECT * FROM user_status")
     conn.close()
 
-    # table data
+    # TODO: table data
     table_data = []
     for entry in data:
         # urconst= entry.urconst
@@ -112,18 +112,36 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # Hash password for security reasons
-        hashed_password = sha256_crypt.encrypt(password)
+        # Front end validation is inplace to enforce both of these. To capture edge cases
+        if username == None or password == None:
+            # Prompt user to provide username and password
+            error = "You must provide both a username and a password"
+            return render_template("register.html", error=error)
 
-        # Add user to users.db
         conn = sqlite3.connect("users.db")
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            (username, hashed_password),
+
+        # Usernames must be unique, check if already exists
+        is_existing = cursor.execute(
+            "SELECT id FROM users WHERE username=?",
+            [username],
         )
-        conn.commit()
-        conn.close()
-        return redirect("/login")
+        if is_existing:
+            # Prompt user to use unique username
+            error = f"The username '{username}' already exists, try a different one"
+            return render_template("register.html", error=error)
+        else:
+            # Hash password for security reasons
+            hashed_password = sha256_crypt.encrypt(password)
+
+            # Add user to users.db
+            cursor.execute(
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (username, hashed_password),
+            )
+            conn.commit()
+            conn.close()
+            return redirect("/login")
 
     return render_template("register.html")
+
