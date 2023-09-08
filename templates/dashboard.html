@@ -6,6 +6,27 @@
 
 {% block body %}
     <h1>You are logged in as: {{session.get("name")}}</h1>
+
+    <div>
+        <ul>
+            <li>
+                <a href='/adminview'>Review Staff Permissions</a></li>
+            </li>
+        </ul>
+    </div>
+
+    <h2>IMDb User Status Table</h2>
+    <p>This table is used to view and assign statuses to contributors who may be Trusted, Suspect, Kill-field (Shadow-banned) or Neutral</p>
+    
+    <div>
+        <p>You can add a new user status by clicking below</p>
+        <ul>
+            <li>
+                <a href='/dashboard/add'>Add new status</a></li>
+            </li>
+        </ul>
+    </div>
+
     <tr>
         <th>test</th>
     </tr>

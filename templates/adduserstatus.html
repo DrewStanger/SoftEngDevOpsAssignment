@@ -1,0 +1,29 @@
+{% extends "dashboardlayout.html" %}
+
+{% block head %}
+    <title>Add User Status</title>
+{% endblock %}
+
+{% block body %}
+
+ <h1>User Status Form</h1>
+    <form method="POST" action="/dashboard/add">
+        <label for="urconst">Unique User Identifier:</label>
+        <input type="text" id="urconst" name="urconst" required><br><br>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="neutral">Neutral</option>
+            <option value="shadow-banned">Shadow Banned</option>
+            <option value="trusted">Trusted</option>
+            <option value="suspect">Suspect</option>
+        </select><br><br>
+
+        <label for="reason">Reason:</label>
+        <input type="text" id="reason" name="reason" maxlength="150"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+
+{% endblock %}

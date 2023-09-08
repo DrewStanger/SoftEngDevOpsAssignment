@@ -28,9 +28,10 @@ class User(db.Model):
 
 
 class UserStatus(db.Model):
-    urconst = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    urconst = db.Column(db.String(8), nullable=False)
     status = db.Column(db.String(150), nullable=False)
-    reason = db.Column(db.String(150))
+    reason = db.Column(db.Text, nullable=False)
     setting_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     setting_user_name = db.Column(db.String(20), nullable=False)
 
@@ -89,11 +90,26 @@ def dashboard():
 
     return render_template("dashboard.html")
 
-@app.route("/dashboard/add")
-def dashboard_add():
-    # TODO this route let users add a new entry
 
-    return render_template("dashboard.html")
+@app.route("/dashboard/add", methods=["GET", "POST"])
+def dashboard_add():
+    if request.method == "POST":
+        urconst = request.form.get('urconst')
+        status = request.form.get('status')
+        reason = request.form.get('reason')
+
+        # Figure out who the logged in user is and their username
+        logged_in_username = session.get("name")
+        logged_in_user_id = (db.session.query(User.id).filter_by(username=logged_in_username).first())[0]
+
+        # Create a new UserStatus record in the database
+        new_status = UserStatus(urconst=urconst, status=status, reason=reason, setting_user_id=logged_in_user_id, setting_user_name=logged_in_username)
+
+        db.session.add(new_status)
+        db.session.commit()
+        return render_template("adduserstatus.html")
+
+    return render_template("adduserstatus.html")
 
 
 
@@ -103,14 +119,12 @@ def adminview():
     return render_template("adminview.html")
 
 
-
 # Register route
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-
 
         # Front end validation is inplace to enforce both of these. To capture edge cases
         if username == None or password == None:
@@ -132,7 +146,7 @@ def register():
             hashed_password = sha256_crypt.encrypt(password)
 
             # Add user to users.db, new users are not admin by default
-            new_user = User(username=username, password=hashed_password, is_admin=False)
+            new_user = User(username=username, password=hashed_password, is_admin=True)
             db.session.add(new_user)
             db.session.commit()
             return redirect("/login")
