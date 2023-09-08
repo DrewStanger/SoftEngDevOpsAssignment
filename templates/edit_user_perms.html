@@ -1,0 +1,17 @@
+{% extends "dashboardlayout.html" %}
+
+{% block head %}
+    <title>Edit User Perms</title>
+{% endblock %}
+
+{% block body %}
+<h1>Edit Status</h1>
+<form method="POST" action="/edit_user/{{ user_to_edit.id }}">
+    <label for="username">Username:</label>
+    <input id="username" name="username">{{ user_to_edit.username }}<br><br>
+    <label for="is_admin">Is Admin:</label>
+    <input id="is_admin" name="is_admin">{{ user_to_edit.is_admin }}<br><br>
+
+    <input type="submit" value="Update User">
+</form>
+{% endblock %}

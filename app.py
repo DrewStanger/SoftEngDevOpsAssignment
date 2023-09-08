@@ -160,9 +160,79 @@ def edit_user_status(status_id):
     # Render the edit form with pre-filled data
     return render_template("edit_status.html", status_to_edit=status_to_edit)
 
+@app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
+def delete_user_status(status_id):
+    logged_in_username = session.get("name")
+    is_user_admin = (
+        db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
+    )[0]
+
+    if is_user_admin == True:
+        # Get the entry to delete
+        status_to_delete = UserStatus.query.filter_by(id=status_id).first()
+        db.session.delete(status_to_delete)
+        db.session.commit()
+        return redirect("/dashboard")
+    else:
+        error = "Delete failed: only Admins can delete entries"
+        return redirect("/dashboard", error=error)
+
+@app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
+def edit_staff_perms(user_id):
+    # Retrieve the UserStatus record to edit
+    user_to_edit = User.query.filter_by(id=user_id).first()
+
+    if request.method == "POST":
+        # Get the updated data from the form
+        updated_username = request.form.get("username")
+        updated_admin_status = request.form.get("is_admin")
+
+
+        # Update the status data
+        user_to_edit.username = updated_username
+        user_to_edit.updated_admin_status = updated_admin_status
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Redirect the user back to the dashboard
+        return redirect("/adminview")
+
+    # Render the edit form with pre-filled data
+    return render_template("edit_user_perms.html", user_to_edit=user_to_edit)
+
+@app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
+def delete_staff_perms(user_id):
+    # TODO: ADD VALIDATION
+    
+    logged_in_username = session.get("name")
+    # User should not be able to delete themselves
+    user_name_to_delete = (
+            db.session.query(User.username).filter_by(username=logged_in_username).first()
+        )[0]
+    
+    if logged_in_username == user_name_to_delete: 
+        error = "User cannot remove their own permissions, contact an Admin"
+        return redirect("/adminview", error=error)
+
+    # User must be admin to delete
+    is_user_admin = (
+            db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
+        )[0]
+
+    if is_user_admin == True:
+        # Get the entry to delete
+        user_to_delete = UserStatus.query.filter_by(id=user_id).first()
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        return redirect("/adminview")
+    else:
+        error = "Delete failed: only Admins can delete entries"
+        return redirect("/adminview", error=error)
+
 
 @app.route("/adminview")
-def adminview():
+def display_user_perms():
     # Retrieve user data from the User table (excluding the password)
     users = User.query.with_entities(User.id, User.username, User.is_admin).all()
     # Render the HTML template and pass the user data

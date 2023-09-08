@@ -36,6 +36,7 @@
             <th>Setting User ID</th>
             <th>Setting User Name</th>
             <th>Edit</th>
+            <th>Delete</th>
         </tr>
         {% for status in user_status %}
         <tr>
@@ -46,7 +47,13 @@
             <td>{{ status.setting_user_id }}</td>
             <td>{{ status.setting_user_name }}</td>
             <td><a href="/edit_status/{{ status.id }}">Edit</a></td>
+            <td>
+                <form method="POST" action="/delete_status/{{ status.id }}">
+                    <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this status record?')">
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </table>
+    <li class="error">{{error}}</li>
 {% endblock %}
