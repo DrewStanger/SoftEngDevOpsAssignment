@@ -6,27 +6,31 @@
 
 {% block body %}
     <h1>IMDb members with Access to the Status System</h1>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Is Admin</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.is_admin }}</td>
-            <td><a href="/edit_user/{{ user.id }}">Edit</a></td>
-            <td>
-                <form method="POST" action="/delete_user/{{ user.id }}">
-                    <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to remove permissions for this user?')">
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">Is Admin</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.is_admin }}</td>
+                <td><a href="/edit_user/{{ user.id }}">Edit</a></td>
+                <td>
+                    <form method="POST" action="/delete_user/{{ user.id }}">
+                        <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to remove permissions for this user?')">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
     <li class="error">{{error}}</li>
 {% endblock %}

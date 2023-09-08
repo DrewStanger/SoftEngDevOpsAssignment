@@ -1,6 +1,7 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
 from datetime import datetime
 from passlib.hash import sha256_crypt
 from os import path
@@ -14,6 +15,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 db = SQLAlchemy()
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_status.db"
 Session(app)
+Bootstrap(app)
 # init db
 db.init_app(app)
 
@@ -175,7 +177,7 @@ def delete_user_status(status_id):
         return redirect("/dashboard")
     else:
         error = "Delete failed: only Admins can delete entries"
-        return redirect("/dashboard", error=error)
+        return render_template("dashboard.html", error=error)
 
 @app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 def edit_staff_perms(user_id):
