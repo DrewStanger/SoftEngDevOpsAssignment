@@ -89,12 +89,12 @@ def dashboard():
 
     return render_template("dashboard.html")
 
-
 @app.route("/dashboard/add")
 def dashboard_add():
     # TODO this route let users add a new entry
 
     return render_template("dashboard.html")
+
 
 
 @app.route("/adminview")
@@ -103,13 +103,14 @@ def adminview():
     return render_template("adminview.html")
 
 
+
 # Register route
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        is_admin = True
+
 
         # Front end validation is inplace to enforce both of these. To capture edge cases
         if username == None or password == None:
@@ -131,9 +132,7 @@ def register():
             hashed_password = sha256_crypt.encrypt(password)
 
             # Add user to users.db, new users are not admin by default
-            new_user = User(
-                username=username, password=hashed_password, is_admin=is_admin
-            )
+            new_user = User(username=username, password=hashed_password, is_admin=False)
             db.session.add(new_user)
             db.session.commit()
             return redirect("/login")
