@@ -137,6 +137,30 @@ def dashboard_add():
     return render_template("adduserstatus.html")
 
 
+@app.route("/edit_status/<int:status_id>", methods=["GET", "POST"])
+def edit_user_status(status_id):
+    # Retrieve the UserStatus record to edit
+    status_to_edit = UserStatus.query.filter_by(id=status_id).first()
+
+    if request.method == "POST":
+        # Get the updated data from the form
+        updated_status = request.form.get("status")
+        updated_reason = request.form.get("reason")
+
+        # Update the status data
+        status_to_edit.status = updated_status
+        status_to_edit.reason = updated_reason
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Redirect the user back to the dashboard
+        return redirect("/dashboard")
+
+    # Render the edit form with pre-filled data
+    return render_template("edit_status.html", status_to_edit=status_to_edit)
+
+
 @app.route("/adminview")
 def adminview():
     # Retrieve user data from the User table (excluding the password)

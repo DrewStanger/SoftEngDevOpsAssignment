@@ -1,0 +1,23 @@
+{% extends "dashboardlayout.html" %}
+
+{% block head %}
+    <title>Edit Status</title>
+{% endblock %}
+
+{% block body %}
+<h1>Edit Status</h1>
+<form method="POST" action="/edit_status/{{ status_to_edit.id }}">
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+        <option value="neutral">Neutral</option>
+        <option value="shadow-banned">Shadow Banned</option>
+        <option value="trusted">Trusted</option>
+        <option value="suspect">Suspect</option>
+    </select><br><br>
+
+    <label for="reason">Reason:</label>
+    <textarea id="reason" name="reason">{{ status_to_edit.reason }}</textarea><br><br>
+
+    <input type="submit" value="Update Status">
+</form>
+{% endblock %}
