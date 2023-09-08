@@ -63,18 +63,28 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # Fetch the hashed password
-        hashed_password = (
-            db.session.query(User.password).filter_by(username=username).first()
+        # Cannot log in if username does not exist
+        user_exists = (
+            db.session.query(User.id).filter(User.username == username).first()
         )
 
-        # Check if the password provided matches the hash and redirect to the index
-        if sha256_crypt.verify(password, hashed_password[0]):
-            # Store username in session
-            session["name"] = username
-            return redirect("/dashboard")
-        # TODO: add error messaging, incorrect password? user does not exist?
-    # If request.method !== POST, load login page
+        if not user_exists:
+            error = f"The username '{username}' does not exist, are you sure you used the right details?"
+            return render_template("login.html", error=error)
+        else:
+            # Fetch the hashed password
+            hashed_password = (
+                db.session.query(User.password).filter_by(username=username).first()
+            )
+
+            # Check if the password provided matches the hash and redirect to the index
+            if sha256_crypt.verify(password, hashed_password[0]):
+                # Store username in session
+                session["name"] = username
+                return redirect("/dashboard")
+            else:
+                error = "Incorrect password, try again."
+                return render_template("login.html", error=error)
     return render_template("login.html")
 
 
@@ -87,7 +97,14 @@ def logout():
 @app.route("/dashboard")
 def dashboard():
     # TODO this route will display the table of users who have an assigned status
-    user_status = UserStatus.query.with_entities(UserStatus.id, UserStatus.urconst, UserStatus.status, UserStatus.reason, UserStatus.setting_user_id, UserStatus.setting_user_name).all()
+    user_status = UserStatus.query.with_entities(
+        UserStatus.id,
+        UserStatus.urconst,
+        UserStatus.status,
+        UserStatus.reason,
+        UserStatus.setting_user_id,
+        UserStatus.setting_user_name,
+    ).all()
     return render_template("dashboard.html", user_status=user_status)
 
 
