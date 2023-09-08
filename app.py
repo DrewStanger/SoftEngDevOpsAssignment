@@ -23,7 +23,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
-    is_admin = db.Column(db.Boolean)
+    is_admin = db.Column(db.Boolean, nullable=False)
     set_status = db.relationship("UserStatus")
 
 
@@ -85,8 +85,22 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
-    # TODO DISPLAY THE LIST OF USERS IN THE USER_STATUS TABLE
+    # TODO this route will display the table of users who have an assigned status
+
     return render_template("dashboard.html")
+
+
+@app.route("/dashboard/add")
+def dashboard_add():
+    # TODO this route let users add a new entry
+
+    return render_template("dashboard.html")
+
+
+@app.route("/adminview")
+def adminview():
+    # TODO this route should display a table of all IMDb staff who can add CREATE, READ and UPDATE the status table
+    return render_template("adminview.html")
 
 
 # Register route
@@ -95,6 +109,7 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        is_admin = True
 
         # Front end validation is inplace to enforce both of these. To capture edge cases
         if username == None or password == None:
@@ -115,8 +130,10 @@ def register():
             # Hash password for security reasons
             hashed_password = sha256_crypt.encrypt(password)
 
-            # Add user to users.db
-            new_user = User(username=username, password=hashed_password)
+            # Add user to users.db, new users are not admin by default
+            new_user = User(
+                username=username, password=hashed_password, is_admin=is_admin
+            )
             db.session.add(new_user)
             db.session.commit()
             return redirect("/login")
