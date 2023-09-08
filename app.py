@@ -202,18 +202,18 @@ def edit_staff_perms(user_id):
     return render_template("edit_user_perms.html", user_to_edit=user_to_edit)
 
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
-def delete_staff_perms(user_id):
-    # TODO: ADD VALIDATION
-    
+def delete_staff_perms(user_id):    
     logged_in_username = session.get("name")
     # User should not be able to delete themselves
     user_name_to_delete = (
-            db.session.query(User.username).filter_by(username=logged_in_username).first()
+            db.session.query(User.username).filter_by(id=user_id).first()
         )[0]
     
     if logged_in_username == user_name_to_delete: 
+        print(logged_in_username)
+        print(user_name_to_delete)
         error = "User cannot remove their own permissions, contact an Admin"
-        return redirect("/adminview", error=error)
+        return render_template("/adminview.html", error=error)
 
     # User must be admin to delete
     is_user_admin = (
@@ -222,13 +222,13 @@ def delete_staff_perms(user_id):
 
     if is_user_admin == True:
         # Get the entry to delete
-        user_to_delete = UserStatus.query.filter_by(id=user_id).first()
+        user_to_delete = db.session.query(User).filter_by(id=user_id).first()
         db.session.delete(user_to_delete)
         db.session.commit()
-        return redirect("/adminview")
+        return render_template("/adminview.html")
     else:
         error = "Delete failed: only Admins can delete entries"
-        return redirect("/adminview", error=error)
+        return render_template("/adminview.html", error=error)
 
 
 @app.route("/adminview")
@@ -266,7 +266,7 @@ def register():
             hashed_password = sha256_crypt.encrypt(password)
 
             # Add user to users.db, new users are not admin by default
-            new_user = User(username=username, password=hashed_password, is_admin=True)
+            new_user = User(username=username, password=hashed_password, is_admin=False)
             db.session.add(new_user)
             db.session.commit()
             return redirect("/login")

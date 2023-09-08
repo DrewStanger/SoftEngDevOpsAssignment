@@ -8,9 +8,13 @@
 <h1>Edit Status</h1>
 <form method="POST" action="/edit_user/{{ user_to_edit.id }}">
     <label for="username">Username:</label>
-    <input id="username" name="username">{{ user_to_edit.username }}<br><br>
+    <input id="username" name="username" required>{{ user_to_edit.username }}<br><br>
     <label for="is_admin">Is Admin:</label>
-    <input id="is_admin" name="is_admin">{{ user_to_edit.is_admin }}<br><br>
+    <select id="is_admin" name="is_admin" required>
+        <option value="True">True</option>
+        <option value="False">False</option>
+    </select>
+    {{ user_to_edit.is_admin }}<br><br>
 
     <input type="submit" value="Update User">
 </form>
