@@ -6,10 +6,18 @@
 
 {% block body %}
     <h1>IMDb members with Access to the Status System</h1>
-    <tr>
-        <th>test</th>
-    </tr>
-    <tr>
-
-    </tr>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Is Admin</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.is_admin }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

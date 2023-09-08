@@ -87,23 +87,31 @@ def logout():
 @app.route("/dashboard")
 def dashboard():
     # TODO this route will display the table of users who have an assigned status
-
-    return render_template("dashboard.html")
+    user_status = UserStatus.query.with_entities(UserStatus.id, UserStatus.urconst, UserStatus.status, UserStatus.reason, UserStatus.setting_user_id, UserStatus.setting_user_name).all()
+    return render_template("dashboard.html", user_status=user_status)
 
 
 @app.route("/dashboard/add", methods=["GET", "POST"])
 def dashboard_add():
     if request.method == "POST":
-        urconst = request.form.get('urconst')
-        status = request.form.get('status')
-        reason = request.form.get('reason')
+        urconst = request.form.get("urconst")
+        status = request.form.get("status")
+        reason = request.form.get("reason")
 
         # Figure out who the logged in user is and their username
         logged_in_username = session.get("name")
-        logged_in_user_id = (db.session.query(User.id).filter_by(username=logged_in_username).first())[0]
+        logged_in_user_id = (
+            db.session.query(User.id).filter_by(username=logged_in_username).first()
+        )[0]
 
         # Create a new UserStatus record in the database
-        new_status = UserStatus(urconst=urconst, status=status, reason=reason, setting_user_id=logged_in_user_id, setting_user_name=logged_in_username)
+        new_status = UserStatus(
+            urconst=urconst,
+            status=status,
+            reason=reason,
+            setting_user_id=logged_in_user_id,
+            setting_user_name=logged_in_username,
+        )
 
         db.session.add(new_status)
         db.session.commit()
@@ -112,11 +120,12 @@ def dashboard_add():
     return render_template("adduserstatus.html")
 
 
-
 @app.route("/adminview")
 def adminview():
-    # TODO this route should display a table of all IMDb staff who can add CREATE, READ and UPDATE the status table
-    return render_template("adminview.html")
+    # Retrieve user data from the User table (excluding the password)
+    users = User.query.with_entities(User.id, User.username, User.is_admin).all()
+    # Render the HTML template and pass the user data
+    return render_template("adminview.html", users=users)
 
 
 # Register route

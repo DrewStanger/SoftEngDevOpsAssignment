@@ -27,10 +27,24 @@
         </ul>
     </div>
 
-    <tr>
-        <th>test</th>
-    </tr>
-    <tr>
-
-    </tr>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>User Const</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Setting User ID</th>
+            <th>Setting User Name</th>
+        </tr>
+        {% for status in user_status %}
+        <tr>
+            <td>{{ status.id }}</td>
+            <td>{{ status.urconst }}</td>
+            <td>{{ status.status }}</td>
+            <td>{{ status.reason }}</td>
+            <td>{{ status.setting_user_id }}</td>
+            <td>{{ status.setting_user_name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
