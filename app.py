@@ -143,6 +143,11 @@ def dashboard_add():
 def edit_user_status(status_id):
     # Retrieve the UserStatus record to edit
     status_to_edit = UserStatus.query.filter_by(id=status_id).first()
+    # We also want to show the last person to edit the data
+    logged_in_username = session.get("name")
+    logged_in_user_id = (
+            db.session.query(User.id).filter_by(username=logged_in_username).first()
+        )[0]
 
     if request.method == "POST":
         # Get the updated data from the form
@@ -152,6 +157,8 @@ def edit_user_status(status_id):
         # Update the status data
         status_to_edit.status = updated_status
         status_to_edit.reason = updated_reason
+        status_to_edit.setting_user_name = logged_in_username
+        status_to_edit.setting_user_id = logged_in_user_id
 
         # Commit the changes to the database
         db.session.commit()
