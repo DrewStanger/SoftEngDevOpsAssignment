@@ -2,41 +2,20 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-from datetime import datetime
 from passlib.hash import sha256_crypt
+from model import db, User, UserStatus 
 from os import path
-
 
 # configure app
 app = Flask(__name__)
 app.secret_key = "used for dev"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-db = SQLAlchemy()
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_status.db"
 Session(app)
 Bootstrap(app)
 # init db
 db.init_app(app)
-
-
-#  define db models
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    is_admin = db.Column(db.Boolean, nullable=False)
-    set_status = db.relationship("UserStatus")
-
-
-class UserStatus(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    urconst = db.Column(db.String(8), nullable=False)
-    status = db.Column(db.String(150), nullable=False)
-    reason = db.Column(db.Text, nullable=False)
-    setting_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    setting_user_name = db.Column(db.String(20), nullable=False)
-
 
 def create_database():
     with app.app_context():
@@ -65,30 +44,21 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # Cannot log in if username does not exist
-        user_exists = (
-            db.session.query(User.id).filter(User.username == username).first()
-        )
-
-        if not user_exists:
-            error = f"The username '{username}' does not exist, are you sure you used the right details?"
+        # If the user exists and provides correct details
+        if authenticate_user(username, password):
+            return redirect("/dashboard")
+        else: 
+            error = 'Username or Password is incorrect, please try again.'
             return render_template("login.html", error=error)
-        else:
-            # Fetch the hashed password
-            hashed_password = (
-                db.session.query(User.password).filter_by(username=username).first()
-            )
-
-            # Check if the password provided matches the hash and redirect to the index
-            if sha256_crypt.verify(password, hashed_password[0]):
-                # Store username in session
-                session["name"] = username
-                return redirect("/dashboard")
-            else:
-                error = "Incorrect password, try again."
-                return render_template("login.html", error=error)
     return render_template("login.html")
 
+# This function gets data from the User table if the username exists and evaluates if the password is correct
+def authenticate_user(username, password):
+    user = db.session.query(User).filter_by(username=username).first()
+    if user and sha256_crypt.verify(password, user.password):
+        session["name"] = username
+        return True
+    return False
 
 @app.route("/logout")
 def logout():
@@ -98,7 +68,7 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
-    # TODO this route will display the table of users who have an assigned status
+    # Get all User Status entries from the db and render these
     user_status = UserStatus.query.with_entities(
         UserStatus.id,
         UserStatus.urconst,
