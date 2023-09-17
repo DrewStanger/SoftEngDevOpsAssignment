@@ -1,10 +1,10 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
 from model import db, User, UserStatus
 from os import path
+from distutils.util import strtobool
 
 # configure app
 app = Flask(__name__)
@@ -49,8 +49,8 @@ def login():
         if authenticate_user(username, password):
             return redirect("/dashboard")
         else:
-            error = "Username or Password is incorrect, please try again."
-            return render_template("login.html", error=error)
+            flash("Username or Password is incorrect, please try again.")
+            return redirect("/login")
     return render_template("login.html")
 
 
@@ -61,6 +61,12 @@ def authenticate_user(username, password):
         session["name"] = username
         return True
     return False
+
+
+# Function returns True if user is admin, false if not
+def is_logged_in_user_admin():
+    logged_in_username = session.get("name")
+    return (db.session.query(User.id).filter_by(username=logged_in_username).first())[0]
 
 
 @app.route("/logout")
@@ -107,7 +113,8 @@ def dashboard_add():
 
         db.session.add(new_status)
         db.session.commit()
-        return render_template("adduserstatus.html")
+        flash(f"Entry for {urconst} has successfully been added!")
+        return redirect("/dashboard/add")
 
     return render_template("adduserstatus.html")
 
@@ -137,6 +144,7 @@ def edit_user_status(status_id):
         db.session.commit()
 
         # Redirect the user back to the dashboard
+        flash(f"Status successfully updated for {status_to_edit.urconst}")
         return redirect("/dashboard")
 
     # Render the edit form with pre-filled data
@@ -145,20 +153,19 @@ def edit_user_status(status_id):
 
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
 def delete_user_status(status_id):
-    logged_in_username = session.get("name")
-    is_user_admin = (
-        db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
-    )[0]
-
-    if is_user_admin == True:
+    if is_logged_in_user_admin() == True:
         # Get the entry to delete
         status_to_delete = UserStatus.query.filter_by(id=status_id).first()
         db.session.delete(status_to_delete)
         db.session.commit()
+
+        flash(f"Status successfully deleted for {status_to_delete.urconst}")
         return redirect("/dashboard")
     else:
-        error = "Delete failed: only Admins can delete entries"
-        return render_template("dashboard.html", error=error)
+        flash(
+            "Delete failed: only Admins can delete entries. Set it to Neutral instead."
+        )
+        return redirect("/dashboard")
 
 
 @app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
@@ -167,19 +174,22 @@ def edit_staff_perms(user_id):
     user_to_edit = User.query.filter_by(id=user_id).first()
 
     if request.method == "POST":
-        # Get the updated data from the form
-        updated_username = request.form.get("username")
-        updated_admin_status = request.form.get("is_admin")
+        if is_logged_in_user_admin() == True:
+            # Get the updated data from the form
+            updated_admin_status = request.form.get("is_admin")
 
-        # Update the status data
-        user_to_edit.username = updated_username
-        user_to_edit.updated_admin_status = updated_admin_status
+            # Safely convert string value to Boolean in a manner python can understand
+            user_to_edit.is_admin = strtobool(updated_admin_status)
 
-        # Commit the changes to the database
-        db.session.commit()
+            # Commit the changes to the database
+            db.session.commit()
 
-        # Redirect the user back to the dashboard
-        return redirect("/adminview")
+            # Redirect the user back to the dashboard
+            flash(f"User Admin status succesfully updated")
+            return redirect("/adminview")
+        else:
+            flash(f"Only Admins are permitted to update this section")
+            return redirect("/adminview")
 
     # Render the edit form with pre-filled data
     return render_template("edit_user_perms.html", user_to_edit=user_to_edit)
@@ -194,25 +204,20 @@ def delete_staff_perms(user_id):
     )[0]
 
     if logged_in_username == user_name_to_delete:
-        print(logged_in_username)
-        print(user_name_to_delete)
-        error = "User cannot remove their own permissions, contact an Admin"
-        return render_template("/adminview.html", error=error)
+        flash("User cannot remove their own permissions, contact an Admin")
+        return redirect("/adminview")
 
-    # User must be admin to delete
-    is_user_admin = (
-        db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
-    )[0]
-
-    if is_user_admin == True:
+    # Only admins can delete users
+    if is_logged_in_user_admin() == True:
         # Get the entry to delete
         user_to_delete = db.session.query(User).filter_by(id=user_id).first()
         db.session.delete(user_to_delete)
         db.session.commit()
-        return render_template("/adminview.html")
+        flash(f"Succesfully deleted user {user_to_delete.username}")
+        return redirect("/adminview")
     else:
-        error = "Delete failed: only Admins can delete entries"
-        return render_template("/adminview.html", error=error)
+        flash("Delete failed: only Admins can delete entries")
+        return redirect("/adminview")
 
 
 @app.route("/adminview")
@@ -233,8 +238,8 @@ def register():
         # Front end validation is inplace to enforce both of these. To capture edge cases
         if username == None or password == None:
             # Prompt user to provide username and password
-            error = "You must provide both a username and a password"
-            return render_template("register.html", error=error)
+            flash("You must provide both a username and a password")
+            return redirect("/register")
 
         # Usernames must be unique, check if already exists
         is_existing = (
@@ -243,8 +248,8 @@ def register():
 
         if is_existing:
             # Prompt user to use unique username
-            error = f"The username '{username}' already exists, try a different one"
-            return render_template("register.html", error=error)
+            flash(f"The username '{username}' already exists, try a different one")
+            return redirect("/register")
         else:
             # Hash password for security reasons
             hashed_password = sha256_crypt.encrypt(password)
@@ -253,5 +258,6 @@ def register():
             new_user = User(username=username, password=hashed_password, is_admin=False)
             db.session.add(new_user)
             db.session.commit()
+            flash("You successfully Registered!")
             return redirect("/login")
     return render_template("register.html")

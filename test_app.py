@@ -98,9 +98,13 @@ def test_register_route_user_exists(client):
 
         assert response_existing_user.status_code == 200
         # Check if the error message is present within the <ol> element with class "error"
-        assert b'The username &#39;existing_user&#39; already exists, try a different one' in response_existing_user.data
+        assert (
+            b"The username &#39;existing_user&#39; already exists, try a different one"
+            in response_existing_user.data
+        )
     # Reset the mocks after the test
-    patch.stopall()  
+    patch.stopall()
+
 
 def test_register_route_new_user(client):
     mock_query_new_user = Mock()
