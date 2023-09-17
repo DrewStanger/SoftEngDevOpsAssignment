@@ -1,17 +1,8 @@
 from flask import session
-from os import path
 from passlib.hash import sha256_crypt
 from model import db, User
-from app import app
 
 # This file contains a selection of helper functions
-
-
-def create_database():
-    with app.app_context():
-        if not path.exists("/user_status.db"):
-            db.create_all()
-            print("database created")
 
 
 # This function gets data from the User table if the username exists and evaluates if the password is correct

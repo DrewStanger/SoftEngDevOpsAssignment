@@ -96,12 +96,8 @@ def test_register_route_user_exists(client):
             "/register", data={"username": "existing_user", "password": "test_password"}
         )
 
-        assert response_existing_user.status_code == 200
-        # Check if the error message is present within the <ol> element with class "error"
-        assert (
-            b"The username &#39;existing_user&#39; already exists, try a different one"
-            in response_existing_user.data
-        )
+        assert response_existing_user.status_code == 302
+        assert response_existing_user.headers["Location"] == "/register"
     # Reset the mocks after the test
     patch.stopall()
 
@@ -122,8 +118,8 @@ def test_register_route_new_user(client):
             "/register", data={"username": "new_user", "password": "test_password"}
         )
 
-        # succesful registeration returns 200 code
-        assert response_new_user.status_code == 200
+        # succesful registeration returns redirect to login
+        assert response_new_user.status_code == 302
 
     # Reset the mocks after the test
     patch.stopall()
