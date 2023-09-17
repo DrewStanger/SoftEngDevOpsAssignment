@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 # Define User table
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -9,6 +10,7 @@ class User(db.Model):
     password = db.Column(db.String(150), nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False)
     set_status = db.relationship("UserStatus")
+
 
 # Define UserStatus table
 class UserStatus(db.Model):

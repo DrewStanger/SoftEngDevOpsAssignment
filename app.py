@@ -3,7 +3,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
-from model import db, User, UserStatus 
+from model import db, User, UserStatus
 from os import path
 
 # configure app
@@ -16,6 +16,7 @@ Session(app)
 Bootstrap(app)
 # init db
 db.init_app(app)
+
 
 def create_database():
     with app.app_context():
@@ -47,10 +48,11 @@ def login():
         # If the user exists and provides correct details
         if authenticate_user(username, password):
             return redirect("/dashboard")
-        else: 
-            error = 'Username or Password is incorrect, please try again.'
+        else:
+            error = "Username or Password is incorrect, please try again."
             return render_template("login.html", error=error)
     return render_template("login.html")
+
 
 # This function gets data from the User table if the username exists and evaluates if the password is correct
 def authenticate_user(username, password):
@@ -59,6 +61,7 @@ def authenticate_user(username, password):
         session["name"] = username
         return True
     return False
+
 
 @app.route("/logout")
 def logout():
@@ -116,8 +119,8 @@ def edit_user_status(status_id):
     # We also want to show the last person to edit the data
     logged_in_username = session.get("name")
     logged_in_user_id = (
-            db.session.query(User.id).filter_by(username=logged_in_username).first()
-        )[0]
+        db.session.query(User.id).filter_by(username=logged_in_username).first()
+    )[0]
 
     if request.method == "POST":
         # Get the updated data from the form
@@ -139,6 +142,7 @@ def edit_user_status(status_id):
     # Render the edit form with pre-filled data
     return render_template("edit_status.html", status_to_edit=status_to_edit)
 
+
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
 def delete_user_status(status_id):
     logged_in_username = session.get("name")
@@ -156,6 +160,7 @@ def delete_user_status(status_id):
         error = "Delete failed: only Admins can delete entries"
         return render_template("dashboard.html", error=error)
 
+
 @app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 def edit_staff_perms(user_id):
     # Retrieve the UserStatus record to edit
@@ -165,7 +170,6 @@ def edit_staff_perms(user_id):
         # Get the updated data from the form
         updated_username = request.form.get("username")
         updated_admin_status = request.form.get("is_admin")
-
 
         # Update the status data
         user_to_edit.username = updated_username
@@ -180,15 +184,16 @@ def edit_staff_perms(user_id):
     # Render the edit form with pre-filled data
     return render_template("edit_user_perms.html", user_to_edit=user_to_edit)
 
+
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
-def delete_staff_perms(user_id):    
+def delete_staff_perms(user_id):
     logged_in_username = session.get("name")
     # User should not be able to delete themselves
     user_name_to_delete = (
-            db.session.query(User.username).filter_by(id=user_id).first()
-        )[0]
-    
-    if logged_in_username == user_name_to_delete: 
+        db.session.query(User.username).filter_by(id=user_id).first()
+    )[0]
+
+    if logged_in_username == user_name_to_delete:
         print(logged_in_username)
         print(user_name_to_delete)
         error = "User cannot remove their own permissions, contact an Admin"
@@ -196,8 +201,8 @@ def delete_staff_perms(user_id):
 
     # User must be admin to delete
     is_user_admin = (
-            db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
-        )[0]
+        db.session.query(User.is_admin).filter_by(username=logged_in_username).first()
+    )[0]
 
     if is_user_admin == True:
         # Get the entry to delete

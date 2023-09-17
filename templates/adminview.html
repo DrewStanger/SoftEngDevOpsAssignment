@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block body %}
+<div class="d-flex flex-column">  
     <h1>IMDb members with Access to the Status System</h1>
     <table class="table">
         <thead>
@@ -32,5 +33,6 @@
             {% endfor %}
         </tbody>
       </table>
-    <li class="error">{{error}}</li>
+    <ol class="error">{{error}}</ol>
+</div>
 {% endblock %}

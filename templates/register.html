@@ -5,17 +5,18 @@
 {% endblock %}
 
 {% block body %}
-    <!-- TODO make use of bootstrap or similar for styling -->
+<div class="d-flex flex-column">
     <h2>Register</h2>
     <form action="/register" method="post">
-        <div>
+        <div class="p-2">
             <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text" required>
         </div>
-        <div>
-            <input name="password" placeholder="Password" type="password" required minlength="10">
+        <div class="p-2">
+            <input name="password" class="form-control" placeholder="Password" type="password" required minlength="10">
         </div>
-        <li class="error">{{error}}</li>
+        <ol class="error">{{error}}</ol>
         <!-- TODO: Implement password confirmation -->
-        <button type="submit">Register</button>
+        <button class="btn btn-primary" type="submit" type="submit">Register</button>
     </form>
+</div>
 {% endblock %}

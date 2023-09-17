@@ -6,8 +6,9 @@
 
 {% block body %}
 
- <h1>User Status Form</h1>
-    <form method="POST" action="/dashboard/add">
+<div class="d-flex flex-column">
+    <h1 class="p-2">User Status Form</h1>
+    <form method="POST" action="/dashboard/add" class="p-2">
         <label for="urconst">Unique User Identifier:</label>
         <input type="text" id="urconst" name="urconst" required><br><br>
 
@@ -24,6 +25,6 @@
 
         <input type="submit" value="Submit">
     </form>
-
+</div>
 
 {% endblock %}

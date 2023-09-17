@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block body %}
+<div class="d-flex flex-column">
     <h4>You are logged in as: {{session.get("name")}}</h4>
     <h2>IMDb User Status Table</h2>
     <p>This table is used to view and assign statuses to contributors who may be Trusted, Suspect, Kill-field (Shadow-banned) or Neutral</p>
@@ -52,5 +53,6 @@
       
        
     </table>
-    <li class="error">{{error}}</li>
+    <ol class="error">{{error}}</ol>
+</div>
 {% endblock %}
