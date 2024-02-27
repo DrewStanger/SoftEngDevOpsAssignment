@@ -1,5 +1,4 @@
 from unittest.mock import Mock, patch
-from flask import session
 from app import app
 import pytest
 
