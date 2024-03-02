@@ -4,3 +4,4 @@ Flask-Session==0.5.0
 Flask-SQLAlchemy==3.0.5
 Jinja2==3.1.2
 passlib==1.7.4
+setuptools==59.6.0
