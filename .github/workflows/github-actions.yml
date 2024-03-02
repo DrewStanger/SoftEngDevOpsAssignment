@@ -14,7 +14,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x' # Update with your desired version
+          python-version: '3.10' # Update with your desired version
 
       - name: Install dependencies
         run: pip install -r requirements.txt
