@@ -14,8 +14,8 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v3
         with:
-          python-version: '3.10' # Update with your desired version
-
+          python-version: '3.10'
+          
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -23,4 +23,12 @@ jobs:
         run: pip install pytest
         
       - name: Run tests
-        run: pytest test_app.py # Update with your test directory path
+        run: pytest test_app.py 
+        
+      - name: Deploy
+        # Only run this step if the branch is main
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
