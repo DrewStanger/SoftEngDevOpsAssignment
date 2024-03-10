@@ -3,7 +3,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
-from forms import EditStatusForm, EditUserPermsForm, LoginForm, RegistrationForm
+from forms import AddUserStatusForm, EditStatusForm, EditUserPermsForm, LoginForm, RegistrationForm
 from model import db, User, UserStatus
 from helpers import *
 from distutils.util import strtobool
@@ -83,10 +83,11 @@ def dashboard():
 
 @app.route("/dashboard/add", methods=["GET", "POST"])
 def dashboard_add():
-    if request.method == "POST":
-        urconst = request.form.get("urconst")
-        status = request.form.get("status")
-        reason = request.form.get("reason")
+    form = AddUserStatusForm()
+    if form.validate_on_submit():
+        urconst = form.urconst.data
+        status = form.status.data
+        reason = form.reason.data
 
         # Figure out who the logged in user is and their username
         logged_in_username = session.get("name")
@@ -108,8 +109,7 @@ def dashboard_add():
         flash(f"Entry for {urconst} has successfully been added!")
         return redirect("/dashboard/add")
 
-    return render_template("adduserstatus.html")
-
+    return render_template("adduserstatus.html", form=form)
 
 @app.route("/edit_status/<int:status_id>", methods=["GET", "POST"])
 def edit_user_status(status_id):

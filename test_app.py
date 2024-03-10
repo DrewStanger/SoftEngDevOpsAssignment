@@ -1,18 +1,18 @@
 from unittest.mock import Mock, patch
-from app import app
-from distutils.util import strtobool
+from app import app  # Import your Flask app
+from flask_wtf.csrf import generate_csrf
 import pytest
 
 
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
+    app.config['WTF_CSRF_ENABLED'] = False
     with app.test_client() as client:
         yield client
 
 
 # Tests for core routes
-
 
 def test_index_route(client):
     response = client.get("/")
@@ -81,7 +81,7 @@ def test_add_status_route(client):
 
 # Should fail as usernames must be unique
 def test_register_route_user_exists(client):
-    # Mock qeury showing that the user already exists
+    # Mock query showing that the user already exists
     mock_query_existing_user = Mock()
     mock_query_existing_user.first.return_value = True  # Simulate an existing user
 
