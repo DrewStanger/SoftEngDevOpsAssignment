@@ -46,7 +46,7 @@ if __name__ == "__main__":
 @app.route("/")
 def index():
     # Users must login to use the system, check if user is logged in
-    if not escape(session.get("name")):
+    if not session.get("name"):
         return redirect("/login")
     return render_template("index.html")
 
