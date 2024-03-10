@@ -8,16 +8,20 @@
 <div class="d-flex flex-column">
     <h2 class="p-2">Login</h2>
     <form action="/login" method="post">
+        {{ form.hidden_tag() }}  <!-- Include CSRF token -->
         <div class="p-2">
-            <input autocomplete="off" required autofocus class="form-control" name="username" placeholder="Username" type="text">
+            {{ form.username(class="form-control", placeholder="Username", autofocus=true) }}
+            {% for error in form.username.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
         </div>
         <div class="p-2">
-            <input class="form-control" required name="password" placeholder="Password" type="password">
+            {{ form.password(class="form-control", placeholder="Password") }}
+            {% for error in form.password.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
         </div>
-        <ol class="error">{{error}}</ol>
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
 </div>
 {% endblock %}
-
-

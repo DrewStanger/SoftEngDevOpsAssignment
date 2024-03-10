@@ -3,9 +3,11 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
+from forms import EditStatusForm, EditUserPermsForm, LoginForm, RegistrationForm
 from model import db, User, UserStatus
 from helpers import *
 from distutils.util import strtobool
+from flask_wtf.csrf import CSRFProtect
 
 # configure app
 app = Flask(__name__)
@@ -17,6 +19,10 @@ Session(app)
 Bootstrap(app)
 # init db
 db.init_app(app)
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
 
 def create_database():
     with app.app_context():
@@ -41,7 +47,8 @@ def index():
 # Login route
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
+    form = LoginForm()
+    if form.validate_on_submit():
         username = request.form.get("username")
         password = request.form.get("password")
 
@@ -51,8 +58,7 @@ def login():
         else:
             flash("Username or Password is incorrect, please try again.")
             return redirect("/login")
-    return render_template("login.html")
-
+    return render_template("login.html", form=form)
 
 
 @app.route("/logout")
@@ -109,22 +115,19 @@ def dashboard_add():
 def edit_user_status(status_id):
     # Retrieve the UserStatus record to edit
     status_to_edit = UserStatus.query.filter_by(id=status_id).first()
-    # We also want to show the last person to edit the data
-    logged_in_username = session.get("name")
-    logged_in_user_id = (
-        db.session.query(User.id).filter_by(username=logged_in_username).first()
-    )[0]
 
-    if request.method == "POST":
+    form = EditStatusForm()
+
+    if form.validate_on_submit():
         # Get the updated data from the form
-        updated_status = request.form.get("status")
-        updated_reason = request.form.get("reason")
-
-        # Update the status data
-        status_to_edit.status = updated_status
-        status_to_edit.reason = updated_reason
+        status_to_edit.status = form.status.data
+        status_to_edit.reason = form.reason.data
+        # We also want to show the last person to edit the data
+        logged_in_username = session.get("name")
         status_to_edit.setting_user_name = logged_in_username
-        status_to_edit.setting_user_id = logged_in_user_id
+        status_to_edit.setting_user_id = (
+            db.session.query(User.id).filter_by(username=logged_in_username).first()[0]
+        )
 
         # Commit the changes to the database
         db.session.commit()
@@ -133,8 +136,12 @@ def edit_user_status(status_id):
         flash(f"Status successfully updated for {status_to_edit.urconst}")
         return redirect("/dashboard")
 
+    # Pre-fill the form with existing data
+    form.status.data = status_to_edit.status
+    form.reason.data = status_to_edit.reason
+
     # Render the edit form with pre-filled data
-    return render_template("edit_status.html", status_to_edit=status_to_edit)
+    return render_template("edit_status.html", form=form, status_to_edit=status_to_edit)
 
 
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
@@ -159,7 +166,9 @@ def edit_staff_perms(user_id):
     # Retrieve the UserStatus record to edit
     user_to_edit = User.query.filter_by(id=user_id).first()
 
-    if request.method == "POST":
+    form = EditUserPermsForm()
+
+    if form.validate_on_submit():
         if is_logged_in_user_admin() == True:
             # Get the updated data from the form
             updated_admin_status = request.form.get("is_admin")
@@ -177,8 +186,10 @@ def edit_staff_perms(user_id):
             flash(f"Only Admins are permitted to update this section")
             return redirect("/adminview")
 
+    # Pre-fill the form with existing data
+    form.is_admin.data = user_to_edit.is_admin
     # Render the edit form with pre-filled data
-    return render_template("edit_user_perms.html", user_to_edit=user_to_edit)
+    return render_template("edit_user_perms.html", form=form, user_to_edit=user_to_edit)
 
 
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
@@ -217,7 +228,8 @@ def display_user_perms():
 # Register route
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
+    form = RegistrationForm()
+    if form.validate_on_submit():
         username = request.form.get("username")
         password = request.form.get("password")
 
@@ -246,4 +258,4 @@ def register():
             db.session.commit()
             flash("You successfully Registered!")
             return redirect("/login")
-    return render_template("register.html")
+    return render_template("register.html", form=form)

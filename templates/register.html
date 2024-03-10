@@ -8,15 +8,14 @@
 <div class="d-flex flex-column">
     <h2>Register</h2>
     <form action="/register" method="post">
-        <div class="p-2">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text" required>
+        {{ form.hidden_tag() }} <!-- Include CSRF token -->
+        <div class="form-group">
+            {{ form.username(class="form-control", placeholder="Username") }}
         </div>
-        <div class="p-2">
-            <input name="password" class="form-control" placeholder="Password" type="password" required minlength="10">
+        <div class="form-group">
+            {{ form.password(class="form-control", placeholder="Password") }}
         </div>
-        <ol class="error">{{error}}</ol>
-        <!-- TODO: Implement password confirmation -->
-        <button class="btn btn-primary" type="submit" type="submit">Register</button>
+        <button class="btn btn-primary" type="submit">Register</button>
     </form>
 </div>
 {% endblock %}

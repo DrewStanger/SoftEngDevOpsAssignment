@@ -9,21 +9,17 @@
 <div class="d-flex flex-column">
     <h1 class="p-2">User Status Form</h1>
     <form method="POST" action="/dashboard/add" class="p-2">
-        <label for="urconst">Unique User Identifier:</label>
-        <input type="text" id="urconst" name="urconst" required><br><br>
-
-        <label for="status">Status:</label>
-        <select id="status" name="status" required>
-            <option value="neutral">Neutral</option>
-            <option value="shadow-banned">Shadow Banned</option>
-            <option value="trusted">Trusted</option>
-            <option value="suspect">Suspect</option>
-        </select><br><br>
-
-        <label for="reason">Reason:</label>
-        <input type="text" id="reason" name="reason" maxlength="150" required><br><br>
-
-        <input type="submit" value="Submit">
+        {{ form.hidden_tag() }} <!-- Include CSRF token -->
+        <div class="form-group">
+            {{ form.urconst(class="form-control", placeholder="Unique User Identifier") }}
+        </div>
+        <div class="form-group">
+            {{ form.status(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.reason(class="form-control", placeholder="Reason") }}
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>
 

@@ -8,15 +8,12 @@
 <div class="d-flex flex-column">
     <h1 class="p-2">Edit Status</h1>
     <form method="POST" action="/edit_user/{{ user_to_edit.id }}" class="p-2">
-        Editing data for: {{ user_to_edit.username }}<br><br>
-        <label for="is_admin">Is Admin:</label>
-        <select id="is_admin" name="is_admin" required>
-            <option value="1">True</option>
-            <option value="0">False</option>
-        </select>
-        Is currently admin? {{ user_to_edit.is_admin }}<br><br>
-
-        <input type="submit" value="Update User">
+        {{ form.hidden_tag() }} <!-- Include CSRF token -->
+        <p>Editing data for: {{ user_to_edit.username }}</p>
+        <div class="form-group">
+            {{ form.is_admin(class="form-control") }}
+        </div>
+        <button class="btn btn-primary" type="submit">Update User</button>
     </form>
 </div>
 {% endblock %}

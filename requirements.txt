@@ -6,3 +6,4 @@ Jinja2==3.1.2
 passlib==1.7.4
 setuptools==59.6.0
 gunicorn==19.7.1
+Flask-WTF==1.2.1
