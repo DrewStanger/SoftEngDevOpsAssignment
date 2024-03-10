@@ -3,11 +3,18 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
-from forms import AddUserStatusForm, EditStatusForm, EditUserPermsForm, LoginForm, RegistrationForm
+from forms import (
+    AddUserStatusForm,
+    EditStatusForm,
+    EditUserPermsForm,
+    LoginForm,
+    RegistrationForm,
+)
 from model import db, User, UserStatus
 from helpers import *
 from distutils.util import strtobool
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import escape
 
 # configure app
 app = Flask(__name__)
@@ -39,7 +46,7 @@ if __name__ == "__main__":
 @app.route("/")
 def index():
     # Users must login to use the system, check if user is logged in
-    if not session.get("name"):
+    if not escape(session.get("name")):
         return redirect("/login")
     return render_template("index.html")
 
@@ -49,8 +56,8 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = escape(request.form.get("username"))
+        password = escape(request.form.get("password"))
 
         # If the user exists and provides correct details
         if authenticate_user(username, password):
@@ -85,12 +92,12 @@ def dashboard():
 def dashboard_add():
     form = AddUserStatusForm()
     if form.validate_on_submit():
-        urconst = form.urconst.data
-        status = form.status.data
-        reason = form.reason.data
+        urconst = escape(form.urconst.data)
+        status = escape(form.status.data)
+        reason = escape(form.reason.data)
 
         # Figure out who the logged in user is and their username
-        logged_in_username = session.get("name")
+        logged_in_username = escape(session.get("name"))
         logged_in_user_id = (
             db.session.query(User.id).filter_by(username=logged_in_username).first()
         )[0]
@@ -111,6 +118,7 @@ def dashboard_add():
 
     return render_template("adduserstatus.html", form=form)
 
+
 @app.route("/edit_status/<int:status_id>", methods=["GET", "POST"])
 def edit_user_status(status_id):
     # Retrieve the UserStatus record to edit
@@ -120,10 +128,10 @@ def edit_user_status(status_id):
 
     if form.validate_on_submit():
         # Get the updated data from the form
-        status_to_edit.status = form.status.data
-        status_to_edit.reason = form.reason.data
+        status_to_edit.status = escape(form.status.data)
+        status_to_edit.reason = escape(form.reason.data)
         # We also want to show the last person to edit the data
-        logged_in_username = session.get("name")
+        logged_in_username = escape(session.get("name"))
         status_to_edit.setting_user_name = logged_in_username
         status_to_edit.setting_user_id = (
             db.session.query(User.id).filter_by(username=logged_in_username).first()[0]
@@ -137,8 +145,8 @@ def edit_user_status(status_id):
         return redirect("/dashboard")
 
     # Pre-fill the form with existing data
-    form.status.data = status_to_edit.status
-    form.reason.data = status_to_edit.reason
+    form.status.data = escape(status_to_edit.status)
+    form.reason.data = escape(status_to_edit.reason)
 
     # Render the edit form with pre-filled data
     return render_template("edit_status.html", form=form, status_to_edit=status_to_edit)
@@ -171,7 +179,7 @@ def edit_staff_perms(user_id):
     if form.validate_on_submit():
         if is_logged_in_user_admin() == True:
             # Get the updated data from the form
-            updated_admin_status = request.form.get("is_admin")
+            updated_admin_status = escape(request.form.get("is_admin"))
 
             # Safely convert string value to Boolean in a manner python can understand
             user_to_edit.is_admin = strtobool(updated_admin_status)
@@ -194,7 +202,7 @@ def edit_staff_perms(user_id):
 
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
 def delete_staff_perms(user_id):
-    logged_in_username = session.get("name")
+    logged_in_username = escape(session.get("name"))
     # User should not be able to delete themselves
     user_name_to_delete = (
         db.session.query(User.username).filter_by(id=user_id).first()
@@ -230,8 +238,8 @@ def display_user_perms():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = escape(request.form.get("username"))
+        password = escape(request.form.get("password"))
 
         # Front end validation is inplace to enforce both of these. To capture edge cases
         if username == None or password == None:

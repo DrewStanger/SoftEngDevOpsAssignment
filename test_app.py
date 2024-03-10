@@ -7,12 +7,13 @@ import pytest
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
-    app.config['WTF_CSRF_ENABLED'] = False
+    app.config["WTF_CSRF_ENABLED"] = False
     with app.test_client() as client:
         yield client
 
 
 # Tests for core routes
+
 
 def test_index_route(client):
     response = client.get("/")
