@@ -5,6 +5,8 @@ from flask_bootstrap import Bootstrap
 from passlib.hash import sha256_crypt
 from forms import (
     AddUserStatusForm,
+    DashboardForm,
+    AdminViewForm,
     EditStatusForm,
     EditUserPermsForm,
     LoginForm,
@@ -76,6 +78,7 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
+    form = DashboardForm()
     # Get all User Status entries from the db and render these
     user_status = UserStatus.query.with_entities(
         UserStatus.id,
@@ -85,7 +88,7 @@ def dashboard():
         UserStatus.setting_user_id,
         UserStatus.setting_user_name,
     ).all()
-    return render_template("dashboard.html", user_status=user_status)
+    return render_template("dashboard.html", user_status=user_status, form=form)
 
 
 @app.route("/dashboard/add", methods=["GET", "POST"])
@@ -154,7 +157,8 @@ def edit_user_status(status_id):
 
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
 def delete_user_status(status_id):
-    if is_logged_in_user_admin() == True:
+    form = DashboardForm()
+    if is_logged_in_user_admin() == True and form.validate_on_submit():
         # Get the entry to delete
         status_to_delete = UserStatus.query.filter_by(id=status_id).first()
         db.session.delete(status_to_delete)
@@ -202,35 +206,38 @@ def edit_staff_perms(user_id):
 
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
 def delete_staff_perms(user_id):
-    logged_in_username = escape(session.get("name"))
-    # User should not be able to delete themselves
-    user_name_to_delete = (
-        db.session.query(User.username).filter_by(id=user_id).first()
-    )[0]
+    form = AdminViewForm()
+    if form.validate_on_submit:
+        logged_in_username = escape(session.get("name"))
+        # User should not be able to delete themselves
+        user_name_to_delete = (
+            db.session.query(User.username).filter_by(id=user_id).first()
+        )[0]
 
-    if logged_in_username == user_name_to_delete:
-        flash("User cannot remove their own permissions, contact an Admin")
-        return redirect("/adminview")
+        if logged_in_username == user_name_to_delete:
+            flash("User cannot remove their own permissions, contact an Admin")
+            return redirect("/adminview")
 
-    # Only admins can delete users
-    if is_logged_in_user_admin() == True:
-        # Get the entry to delete
-        user_to_delete = db.session.query(User).filter_by(id=user_id).first()
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        flash(f"Succesfully deleted user {user_to_delete.username}")
-        return redirect("/adminview")
-    else:
-        flash("Delete failed: only Admins can delete entries")
-        return redirect("/adminview")
+        # Only admins can delete users
+        if is_logged_in_user_admin() == True:
+            # Get the entry to delete
+            user_to_delete = db.session.query(User).filter_by(id=user_id).first()
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            flash(f"Succesfully deleted user {user_to_delete.username}")
+            return redirect("/adminview")
+        else:
+            flash("Delete failed: only Admins can delete entries")
+            return redirect("/adminview")
 
 
 @app.route("/adminview")
 def display_user_perms():
+    form = AdminViewForm()
     # Retrieve user data from the User table (excluding the password)
     users = User.query.with_entities(User.id, User.username, User.is_admin).all()
     # Render the HTML template and pass the user data
-    return render_template("adminview.html", users=users)
+    return render_template("adminview.html", users=users, form=form)
 
 
 # Register route

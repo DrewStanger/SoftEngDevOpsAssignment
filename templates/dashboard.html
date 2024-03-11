@@ -43,6 +43,7 @@
                 <td><a href="/edit_status/{{ status.id }}">Edit</a></td>
                 <td>
                     <form method="POST" action="/delete_status/{{ status.id }}">
+                        {{ form.hidden_tag() }} <!-- Include CSRF token -->
                         <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this status record?')">
                     </form>
                 </td>

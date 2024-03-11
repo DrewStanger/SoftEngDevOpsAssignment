@@ -55,3 +55,9 @@ class EditUserPermsForm(FlaskForm):
         validators=[DataRequired()],
     )
     submit = SubmitField("Update User")
+
+class DashboardForm(FlaskForm):
+    submit = SubmitField("Delete")
+
+class AdminViewForm(FlaskForm):
+    submit = SubmitField("Delete")

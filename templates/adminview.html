@@ -26,6 +26,7 @@
                 <td><a href="/edit_user/{{ user.id }}">Edit</a></td>
                 <td>
                     <form method="POST" action="/delete_user/{{ user.id }}">
+                        {{ form.hidden_tag() }} <!-- Include CSRF token -->
                         <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to remove permissions for this user?')">
                     </form>
                 </td>

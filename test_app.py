@@ -18,7 +18,6 @@ def client():
 def test_index_route(client):
     response = client.get("/")
     # User not logged in so expect 302 for redirect
-    print(response)
     assert response.status_code == 302
     # Should be redirected to /login
     assert response.headers["Location"] == "/login"
