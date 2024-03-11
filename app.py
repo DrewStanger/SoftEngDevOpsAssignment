@@ -78,6 +78,9 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     form = DashboardForm()
     # Get all User Status entries from the db and render these
     user_status = UserStatus.query.with_entities(
@@ -93,6 +96,9 @@ def dashboard():
 
 @app.route("/dashboard/add", methods=["GET", "POST"])
 def dashboard_add():
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     form = AddUserStatusForm()
     if form.validate_on_submit():
         urconst = escape(form.urconst.data)
@@ -124,6 +130,9 @@ def dashboard_add():
 
 @app.route("/edit_status/<int:status_id>", methods=["GET", "POST"])
 def edit_user_status(status_id):
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     # Retrieve the UserStatus record to edit
     status_to_edit = UserStatus.query.filter_by(id=status_id).first()
 
@@ -157,6 +166,9 @@ def edit_user_status(status_id):
 
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
 def delete_user_status(status_id):
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     form = DashboardForm()
     if is_logged_in_user_admin() == True and form.validate_on_submit():
         # Get the entry to delete
@@ -175,6 +187,9 @@ def delete_user_status(status_id):
 
 @app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 def edit_staff_perms(user_id):
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     # Retrieve the UserStatus record to edit
     user_to_edit = User.query.filter_by(id=user_id).first()
 
@@ -206,6 +221,9 @@ def edit_staff_perms(user_id):
 
 @app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
 def delete_staff_perms(user_id):
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     form = AdminViewForm()
     if form.validate_on_submit:
         logged_in_username = escape(session.get("name"))
@@ -233,6 +251,9 @@ def delete_staff_perms(user_id):
 
 @app.route("/adminview")
 def display_user_perms():
+    if not session.get("name"):
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
     form = AdminViewForm()
     # Retrieve user data from the User table (excluding the password)
     users = User.query.with_entities(User.id, User.username, User.is_admin).all()
