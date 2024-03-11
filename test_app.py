@@ -71,11 +71,17 @@ def test_logout_route_when_not_logged_in(client):
 
 
 def test_dashboard_route(client):
+    # Set user is logged in
+    with client.session_transaction() as session:
+        session["name"] = "test_user"
     response = client.get("/dashboard")
     assert response.status_code == 200
 
 
 def test_add_status_route(client):
+    # Set user is logged in
+    with client.session_transaction() as session:
+        session["name"] = "test_user"
     response = client.get("/dashboard/add")
     assert response.status_code == 200
 
