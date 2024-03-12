@@ -1,4 +1,4 @@
-from flask import flash, redirect, session
+from flask import session
 from passlib.hash import sha256_crypt
 from model import db, User
 

@@ -56,6 +56,15 @@ def login_required(f):
 
     return decorated_function
 
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if is_logged_in_user_admin():
+            flash("Only admins are permitted")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 
 @app.route("/")
 def index():
@@ -172,9 +181,10 @@ def edit_user_status(status_id):
 
 @app.route("/delete_status/<int:status_id>", methods=["GET", "POST"])
 @login_required
+@admin_only
 def delete_user_status(status_id):
     form = DashboardForm()
-    if is_logged_in_user_admin() == True and form.validate_on_submit():
+    if form.validate_on_submit():
         # Get the entry to delete
         status_to_delete = UserStatus.query.filter_by(id=status_id).first()
         db.session.delete(status_to_delete)
