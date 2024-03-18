@@ -17,4 +17,8 @@ def authenticate_user(username, password):
 # Function returns True if user is admin, false if not
 def is_logged_in_user_admin():
     logged_in_username = session.get("name")
-    return (db.session.query(User.id).filter_by(username=logged_in_username).first())[0]
+    user = User.query.filter_by(username=logged_in_username).first()
+    if user:
+        return user.is_admin
+    else:
+        return False
