@@ -1,22 +1,21 @@
+<!-- login.html -->
 {% extends "layout.html" %}
-
 {% block head %}
     <title>Login</title>
 {% endblock %}
-
 {% block body %}
 <div class="d-flex flex-column">
     <h2 class="p-2">Login</h2>
-    <form action="/login" method="post">
+    <form id="loginForm" action="/login" method="post" onsubmit="return validateLoginForm()">
         {{ form.hidden_tag() }}  <!-- Include CSRF token -->
         <div class="p-2">
-            {{ form.username(class="form-control", placeholder="Username", autofocus=true) }}
+            {{ form.username(class="form-control", placeholder="Username", autofocus=true, pattern="[a-zA-Z0-9]{3,20}", title="Username must be 3-20 characters and alphanumeric") }}
             {% for error in form.username.errors %}
                 <span class="text-danger">{{ error }}</span>
             {% endfor %}
         </div>
         <div class="p-2">
-            {{ form.password(class="form-control", placeholder="Password") }}
+            {{ form.password(class="form-control", placeholder="Password", pattern=".{6,}", title="Password must be at least 6 characters") }}
             {% for error in form.password.errors %}
                 <span class="text-danger">{{ error }}</span>
             {% endfor %}
@@ -24,4 +23,26 @@
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
 </div>
+
+<script>
+function validateLoginForm() {
+    var username = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
+
+    // Regular expressions for validation
+    var usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
+    var passwordRegex = /^.{8,}$/;
+
+    // Check if inputs match the patterns
+    if (!usernameRegex.test(username)) {
+        alert("Username must be 4-20 characters and alphanumeric");
+        return false;
+    }
+    if (!passwordRegex.test(password)) {
+        alert("Password must be at least 8 characters");
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}

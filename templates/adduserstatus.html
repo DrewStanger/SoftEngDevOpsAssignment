@@ -8,22 +8,52 @@
 
 <div class="d-flex flex-column">
     <h1 class="p-2">User Status Form</h1>
-    <form method="POST" action="/dashboard/add" class="p-2">
+    <form id="addUserStatusForm" method="POST" action="/dashboard/add" class="p-2" onsubmit="return validateAddUserStatusForm()">
         {{ form.hidden_tag() }} <!-- Include CSRF token -->
         <div class="form-group">
             <label for="urconst">Urconst:</label>
-            {{ form.urconst(class="form-control", placeholder="Unique User Identifier") }}
+            {{ form.urconst(class="form-control", id="urconst", placeholder="Unique User Identifier") }}
         </div>
         <div class="form-group">
             <label for="status">Status:</label>
-            {{ form.status(class="form-control") }}
+            {{ form.status(class="form-control", id="status") }}
         </div>
         <div class="form-group">
             <label for="reason">Reason:</label>
-            {{ form.reason(class="form-control", placeholder="Reason") }}
+            {{ form.reason(class="form-control", id="reason", placeholder="Reason") }}
         </div>
         <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='validation.js') }}"></script>
+<script>
+function validateAddUserStatusForm() {
+    var urconst = document.getElementById("urconst").value;
+    var status = document.getElementById("status").value;
+    var reason = document.getElementById("reason").value;
+
+    // Regular expressions for validation
+    var urconstRegex = /^[a-zA-Z0-9_\-]+$/; // Alphanumeric characters, underscores, and hyphens
+    var statusRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
+    var reasonRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
+
+    // Check if inputs match the patterns
+    if (!urconstRegex.test(urconst)) {
+        alert("Urconst contains invalid characters");
+        return false;
+    }
+    if (!statusRegex.test(status)) {
+        alert("Status contains invalid characters");
+        return false;
+    }
+    if (!reasonRegex.test(reason)) {
+        alert("Reason contains invalid characters");
+        return false;
+    }
+
+    return true; // Return true if validation passes, false otherwise
+}
+</script>
 
 {% endblock %}
