@@ -21,27 +21,5 @@
     </form>
 </div>
 
-<script src="{{ url_for('static', filename='validation.js') }}"></script>
-<script>
-function validateEditStatusForm() {
-    var status = document.getElementById("status").value;
-    var reason = document.getElementById("reason").value;
-
-    // Regular expressions for validation
-    var statusRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
-    var reasonRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
-
-    // Check if inputs match the patterns
-    if (!statusRegex.test(status)) {
-        alert("Status contains invalid characters");
-        return false;
-    }
-    if (!reasonRegex.test(reason)) {
-        alert("Reason contains invalid characters");
-        return false;
-    }
-
-    return true; // Return true if validation passes, false otherwise
-}
-</script>
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
 {% endblock %}

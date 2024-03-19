@@ -26,34 +26,6 @@
     </form>
 </div>
 
-<script src="{{ url_for('static', filename='validation.js') }}"></script>
-<script>
-function validateAddUserStatusForm() {
-    var urconst = document.getElementById("urconst").value;
-    var status = document.getElementById("status").value;
-    var reason = document.getElementById("reason").value;
-
-    // Regular expressions for validation
-    var urconstRegex = /^[a-zA-Z0-9_\-]+$/; // Alphanumeric characters, underscores, and hyphens
-    var statusRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
-    var reasonRegex = /^[a-zA-Z0-9\s\-.,!?()'"\\/]+$/; // Alphanumeric characters, spaces, and common punctuation
-
-    // Check if inputs match the patterns
-    if (!urconstRegex.test(urconst)) {
-        alert("Urconst contains invalid characters");
-        return false;
-    }
-    if (!statusRegex.test(status)) {
-        alert("Status contains invalid characters");
-        return false;
-    }
-    if (!reasonRegex.test(reason)) {
-        alert("Reason contains invalid characters");
-        return false;
-    }
-
-    return true; // Return true if validation passes, false otherwise
-}
-</script>
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
 
 {% endblock %}

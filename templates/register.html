@@ -19,26 +19,5 @@
     </form>
 </div>
 
-<script src="{{ url_for('static', filename='validation.js') }}"></script>
-<script>
-function validateRegisterForm() {
-    var username = document.getElementById("username").value;
-    var password = document.getElementById("password").value;
-
-    // Regular expressions for validation
-    var usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
-    var passwordRegex = /^.{8,}$/;
-
-    // Check if inputs match the patterns
-    if (!usernameRegex.test(username)) {
-        alert("Username must be 4-20 characters and alphanumeric");
-        return false;
-    }
-    if (!passwordRegex.test(password)) {
-        alert("Password must be at least 8 characters");
-        return false;
-    }
-    return true;
-}
-</script>
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
 {% endblock %}
