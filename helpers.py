@@ -5,7 +5,8 @@ from model import db, User
 # This file contains a selection of helper functions
 
 
-# This function gets data from the User table if the username exists and evaluates if the password is correct
+# This function gets data from the User table if the username exists 
+# and evaluates if the password is correct
 def authenticate_user(username, password):
     user = db.session.query(User).filter_by(username=username).first()
     if user and sha256_crypt.verify(password, user.password):
