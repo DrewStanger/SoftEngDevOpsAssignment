@@ -45,6 +45,7 @@ if __name__ == "__main__":
     create_database()
     app.run(debug=True)
 
+
 @app.route("/")
 def index():
     # Users must login to use the system, check if user is logged in
@@ -217,21 +218,38 @@ def delete_staff_perms(user_id):
     if form.validate_on_submit:
         logged_in_username = escape(session.get("name"))
         # User should not be able to delete themselves
-        user_name_to_delete = (
-            db.session.query(User.username).filter_by(id=user_id).first()
-        )[0]
+        user_to_delete = User.query.get(user_id)
+        if user_to_delete is None:
+            flash("User not found")
+            return redirect("/adminview")
 
+        user_name_to_delete = user_to_delete.username
         if logged_in_username == user_name_to_delete:
             flash("User cannot remove their own permissions, contact an Admin")
             return redirect("/adminview")
 
         # Only admins can delete users
-        if is_logged_in_user_admin() == True:
-            # Get the entry to delete
-            user_to_delete = db.session.query(User).filter_by(id=user_id).first()
+        if is_logged_in_user_admin():
+            # Get the ID of the currently logged-in user
+            current_user = User.query.filter_by(username=logged_in_username).first()
+            current_user_id = current_user.id
+
+            # Get all related UserStatus entries for the user to be deleted
+            user_status_entries = UserStatus.query.filter_by(
+                setting_user_id=user_id
+            ).all()
+            if user_status_entries:
+                # Update setting_user_id in UserStatus entries
+                for user_status_entry in user_status_entries:
+                    user_status_entry.setting_user_name = logged_in_username
+                    user_status_entry.setting_user_id = current_user_id
+                db.session.commit()
+
+            # Delete the user
             db.session.delete(user_to_delete)
             db.session.commit()
-            flash(f"Succesfully deleted user {user_to_delete.username}")
+
+            flash(f"Succesfully deleted user {user_name_to_delete}")
             return redirect("/adminview")
         else:
             flash("Delete failed: only Admins can delete entries")
