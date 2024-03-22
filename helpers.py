@@ -1,4 +1,5 @@
-from flask import session
+from functools import wraps
+from flask import flash, redirect, session
 from passlib.hash import sha256_crypt
 from model import db, User
 
@@ -23,3 +24,22 @@ def is_logged_in_user_admin():
         return user.is_admin
     else:
         return False
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("name"):
+            flash("You must be logged in.")
+            return redirect("/login")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if is_logged_in_user_admin():
+            flash("Only admins are permitted")
+        return f(*args, **kwargs)
+
+    return decorated_function
